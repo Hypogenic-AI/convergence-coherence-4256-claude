@@ -1,0 +1,1025 @@
+You are an academic paper writer for mathematics. Generate a complete AMS-style
+paper based on the mathematical results provided.
+
+════════════════════════════════════════════════════════════════════════════════
+                         IMPORTANT: BEFORE YOU START
+════════════════════════════════════════════════════════════════════════════════
+
+Before writing any content, you MUST complete these steps:
+
+1. READ THE SKILL: Review the paper-writer skill at .claude/skills/paper-writer/SKILL.md
+2. READ THE STYLE GUIDE: Study templates/paper_writing/lab_style_guide.md carefully
+3. REVIEW AMS SAMPLE: Skim paper_draft/example_paper.tex for LaTeX formatting
+   conventions ONLY — it is the official AMS journal sample file that demonstrates
+   how to use amsart theorem environments, equation formatting, list types,
+   bibliography style, and document structure. It is NOT a real paper and its
+   "content" is purely illustrative (placeholder lemmas, dummy proofs, etc.).
+   Do NOT imitate its content or narrative structure.
+4. REVIEW LANGUAGE STYLE: Browse paper_examples/ for language and exposition patterns
+5. VERIFY COMMAND TEMPLATES: Command templates (math.tex, general.tex, macros.tex)
+   are pre-copied to paper_draft/commands/
+
+CRITICAL: The AMS sample file is a LaTeX formatting reference, not a content template.
+Use it to learn \documentclass{amsart} conventions (theorem/proof environments,
+\bibliographystyle{amsplain}, author/address blocks). Write your own content
+based on the research report below.
+
+════════════════════════════════════════════════════════════════════════════════
+                            RESEARCH REPORT
+════════════════════════════════════════════════════════════════════════════════
+
+# Convergence Rates in Chain-of-Thought Reasoning as Discrete Dynamical Systems
+
+## 1. Executive Summary
+
+We develop a rigorous mathematical framework for analyzing chain-of-thought (CoT) reasoning as a discrete dynamical system on probability distributions over reasoning states. We model CoT as a Markov transition operator T acting on the probability simplex P(S) equipped with the Wasserstein-2 metric, and establish convergence rate bounds in two regimes:
+
+1. **Contractive regime (Theorem 1):** When the Dobrushin coefficient δ(T) &lt; 1, the iterates converge exponentially: W₁(Tⁿμ₀, μ*) ≤ δ(T)ⁿ · W₁(μ₀, μ*), with the unique stationary distribution μ* as the fixed point.
+
+2. **Metastable regime (Theorem 3):** For transition matrices with (K, ε)-metastable cluster structure, the spectral gap satisfies γ = Θ(Kε/(K-1)), yielding exponential convergence at rate (1-γ), which becomes arbitrarily slow as ε → 0.
+
+We prove that the spectral gap γ of the transition matrix is the fundamental quantity governing convergence, establish a phase transition in convergence behavior as inter-cluster coupling varies, and verify all predictions computationally. The correlation between predicted spectral convergence rates and empirical W₂ decay rates is r = 0.979 across 30 random transition matrices.
+
+## 2. Research Question
+
+**Can the convergence behavior of chain-of-thought reasoning be rigorously characterized as a discrete dynamical system, with explicit convergence rate bounds determined by spectral properties of the transition operator?**
+
+We investigate this through the lens of Markov chain theory and optimal transport, seeking to unify the exponential convergence results of fixed-point iteration theory (Ke et al. 2024, Bai et al. 2019) with the power-law hitting time results of metastability theory (Kim et al. 2025).
+
+## 3. Definitions and Notation
+
+### 3.1 State Space and Metric
+
+**Definition 1 (Reasoning State Space).** Let S = {s₁, ..., s_N} be a finite set of reasoning states with metric d: S × S → ℝ≥₀ inherited from the Euclidean distance on LLM hidden state embeddings: d(sᵢ, sⱼ) = ‖eᵢ - eⱼ‖₂.
+
+**Definition 2 (Probability Simplex).** P(S) = {μ ∈ ℝᴺ : μᵢ ≥ 0, Σᵢ μᵢ = 1} denotes the space of probability distributions on S.
+
+**Definition 3 (Wasserstein-p Distance).** For μ, ν ∈ P(S) and p ≥ 1:
+
+$$W_p(μ, ν) = \left(\min_{π \in \Pi(μ,ν)} \sum_{i,j} π_{ij} \cdot d(s_i, s_j)^p\right)^{1/p}$$
+
+where Π(μ,ν) is the set of couplings. On finite S, (P(S), W_p) is a compact metric space.
+
+### 3.2 Transition Operator
+
+**Definition 4 (CoT Transition Kernel).** A row-stochastic matrix P ∈ ℝ^{N×N} where P_{ij} = P(X_{t+1} = sⱼ | X_t = sᵢ) models one step of CoT reasoning.
+
+**Definition 5 (CoT Transition Operator).** T: P(S) → P(S) defined by Tμ = μP (row-vector convention). This maps a distribution over reasoning states through one CoT step.
+
+### 3.3 Contraction Coefficients
+
+**Definition 6 (Dobrushin Coefficient).** For transition matrix P:
+
+$$\delta(P) = \frac{1}{2} \max_{i,k} \sum_j |P_{ij} - P_{kj}| = 1 - \min_{i,k} \sum_j \min(P_{ij}, P_{kj})$$
+
+**Definition 7 (Spectral Gap).** For irreducible aperiodic P with eigenvalues 1 = λ₁ ≥ |λ₂| ≥ ... ≥ |λ_N|:
+
+$$\gamma(P) = 1 - |λ₂|$$
+
+### 3.4 Metastable Structure
+
+**Definition 8 ((K, ε)-Metastable Structure).** P has (K, ε)-metastable structure if S = C₁ ∪ ... ∪ C_K with |Cₖ| = M and:
+- P_{ij} = Θ(1/M) for sᵢ, sⱼ ∈ Cₖ (within-cluster)
+- P_{ij} = Θ(ε/(KM)) for sᵢ ∈ Cₖ, sⱼ ∈ Cₗ, k ≠ l (between-cluster)
+
+## 4. Statement of Results
+
+**Lemma 1 (Well-Posedness).** The operator T: P(S) → P(S) defined by Tμ = μP is well-defined, continuous in W_p for all p ≥ 1, and maps P(S) into itself.
+
+**Lemma 2 (Dobrushin Contraction in W₁).** For any transition matrix P with Dobrushin coefficient δ(P) &lt; 1 and any μ, ν ∈ P(S):
+
+$$W_1(Tμ, Tν) \leq \delta(P) \cdot W_1(μ, ν)$$
+
+**Theorem 1 (Exponential Convergence Under Contraction).** Let P be a transition matrix with δ(P) &lt; 1. Then:
+1. P has a unique stationary distribution μ*.
+2. For all μ₀ ∈ P(S): W₁(Tⁿμ₀, μ*) ≤ δ(P)ⁿ · W₁(μ₀, μ*).
+3. The convergence is exponential with rate δ(P).
+
+**Theorem 2 (Spectral Characterization of Convergence).** Let P be irreducible and aperiodic with spectral gap γ. Then for the total variation distance:
+
+$$\|Tⁿμ₀ - μ*\|_{TV} \leq C(μ₀) \cdot (1 - γ)ⁿ$$
+
+where C(μ₀) depends on the initial condition. The W₂ convergence rate satisfies:
+
+$$W_2(Tⁿμ₀, μ*) \leq D \cdot (1 - γ)^{n/2}$$
+
+where D = diam(S) · √(C(μ₀)).
+
+**Theorem 3 (Metastable Spectral Gap).** For a transition matrix with (K, ε)-metastable structure (K ≥ 2 clusters of size M):
+
+$$\gamma(P) = \frac{K\varepsilon}{K - 1} + O(\varepsilon^2)$$
+
+Consequently, the convergence rate is (1 - Kε/(K-1)), and the mixing time satisfies:
+
+$$t_{mix} = \Theta\left(\frac{K-1}{K\varepsilon} \cdot \log(1/\delta)\right)$$
+
+for mixing to within total variation distance δ.
+
+**Theorem 4 (Coupling-Dependent Phase Transition).** Consider a family of transition matrices P(ε) with (K, ε)-metastable structure parameterized by ε ∈ (0, 1). There exists a critical coupling ε_c such that:
+- For ε &lt; ε_c: The spectral gap γ(P) = O(ε), convergence is exponential but slow, and the system exhibits quasi-stationary behavior within clusters for O(1/ε) steps before global mixing.
+- For ε &gt; ε_c: The spectral gap γ(P) = Θ(1), convergence is rapid, and the cluster structure is no longer dynamically relevant.
+
+The crossover occurs at ε_c ≈ γ_intra / K, where γ_intra is the within-cluster spectral gap.
+
+**Proposition 1 (Bifurcation in Bistable Systems).** For a bistable transition matrix with two basins of attraction separated by coupling strength c:
+- When c &lt; c_crit, the second eigenvalue |λ₂| ≈ 1 - 2c, and different initial conditions remain separated for Θ(1/c) steps.
+- When c &gt; c_crit, all initial conditions converge to the unique stationary distribution in O(1/γ_intra) steps.
+
+## 5. Proofs
+
+### Proof of Lemma 1
+
+**Proof.** Let μ ∈ P(S). Then (Tμ)ⱼ = Σᵢ μᵢ P_{ij}. Since μᵢ ≥ 0 and P_{ij} ≥ 0, we have (Tμ)ⱼ ≥ 0. Furthermore, Σⱼ (Tμ)ⱼ = Σⱼ Σᵢ μᵢ P_{ij} = Σᵢ μᵢ Σⱼ P_{ij} = Σᵢ μᵢ · 1 = 1, since P is row-stochastic. Thus Tμ ∈ P(S).
+
+For continuity in W_p: let μₙ → μ in W_p. Since S is finite, W_p convergence is equivalent to pointwise convergence of probability vectors. Then (Tμₙ)ⱼ = Σᵢ (μₙ)ᵢ P_{ij} → Σᵢ μᵢ P_{ij} = (Tμ)ⱼ for each j, giving Tμₙ → Tμ pointwise and hence in W_p. □
+
+### Proof of Lemma 2
+
+**Proof.** We use the Kantorovich-Rubinstein duality for W₁ on finite metric spaces:
+
+$$W_1(μ, ν) = \max_{f: \text{Lip}(f) \leq 1} \sum_i f(s_i)(μ_i - ν_i)$$
+
+where Lip(f) = max_{i≠j} |f(sᵢ) - f(sⱼ)| / d(sᵢ, sⱼ).
+
+For any 1-Lipschitz function f, define g = Pf where g(sᵢ) = Σⱼ P_{ij} f(sⱼ). Then:
+
+$$\sum_i g(s_i)(μ_i - ν_i) = \sum_i \left(\sum_j P_{ij} f(s_j)\right)(μ_i - ν_i) = \sum_j f(s_j)\left(\sum_i (μ_i - ν_i)P_{ij}\right) = \sum_j f(s_j)(Tμ - Tν)_j$$
+
+So W₁(Tμ, Tν) ≤ max_{f: Lip(f)≤1} Σⱼ f(sⱼ)(Tμ - Tν)ⱼ = max_{g=Pf, Lip(f)≤1} Σᵢ g(sᵢ)(μᵢ - νᵢ).
+
+It suffices to show Lip(Pf) ≤ δ(P) · Lip(f). For any i, k:
+
+$$|g(s_i) - g(s_k)| = \left|\sum_j (P_{ij} - P_{kj}) f(s_j)\right|$$
+
+Let f* = min_j f(sⱼ). Then:
+
+$$|g(s_i) - g(s_k)| = \left|\sum_j (P_{ij} - P_{kj})(f(s_j) - f^*)\right| \leq \sum_j |P_{ij} - P_{kj}| \cdot |f(s_j) - f^*|$$
+
+Since f is 1-Lipschitz, |f(sⱼ) - f*| ≤ diam(S). More carefully, by coupling the positive and negative parts of P_{ij} - P_{kj}:
+
+$$|g(s_i) - g(s_k)| \leq \delta(P) \cdot \max_{a,b} |f(s_a) - f(s_b)| \cdot \frac{d(s_i, s_k)}{d(s_i, s_k)}$$
+
+Wait — we need to be more careful. The standard Dobrushin contraction gives contraction in total variation, not directly in W₁ with the ground metric. Let us use the coupling approach instead.
+
+**Alternative proof via coupling.** Let (X, Y) be an optimal coupling achieving W₁(μ, ν). Construct a Markovian coupling: given (X, Y) = (sᵢ, sₖ), draw (X&#39;, Y&#39;) by choosing a joint distribution over (sⱼ, sₗ) with marginals P_{ij} and P_{kl} that minimizes E[d(X&#39;, Y&#39;) | X = sᵢ, Y = sₖ].
+
+By the definition of Dobrushin coefficient via coupling, for each pair (sᵢ, sₖ), there exists a coupling of the rows Pᵢ and Pₖ such that P(X&#39; ≠ Y&#39;) ≤ δ(P). Using this coupling:
+
+$$E[d(X&#39;, Y&#39;) | X = s_i, Y = s_k] \leq \delta(P) \cdot d_{\max} + (1 - \delta(P)) \cdot 0$$
+
+This is too loose. Instead, we use the more refined result:
+
+**Refined bound.** For any two probability measures μ, ν on a finite metric space (S, d) with transition operator T defined by a stochastic matrix P:
+
+$$W_1(Tμ, Tν) \leq \eta(P) \cdot W_1(μ, ν)$$
+
+where η(P) is the *Wasserstein contraction coefficient*:
+
+$$\eta(P) = \sup_{i \neq k} \frac{W_1(P_i, P_k)}{d(s_i, s_k)}$$
+
+with P_i = (P_{i1}, ..., P_{iN}) denoting the i-th row of P as a probability measure.
+
+This follows from:
+
+$$W_1(Tμ, Tν) = W_1\left(\sum_i μ_i P_i, \sum_i ν_i P_i\right) \leq \sum_{(i,k)} π^*_{ik} W_1(P_i, P_k) \leq \eta(P) \sum_{(i,k)} π^*_{ik} d(s_i, s_k) = \eta(P) \cdot W_1(μ, ν)$$
+
+where π* is the optimal coupling of μ and ν, and the first inequality uses the convexity of W₁. When η(P) &lt; 1, this gives the desired contraction. □
+
+**Remark.** The Wasserstein contraction coefficient η(P) is a finer measure of contractivity than the Dobrushin coefficient δ(P). We have η(P) ≤ δ(P), so δ(P) &lt; 1 implies η(P) &lt; 1, but η(P) &lt; 1 can hold even when δ(P) = 1 for specific metric structures.
+
+### Proof of Theorem 1
+
+**Proof.** By Lemma 2, T is a contraction on the complete metric space (P(S), W₁) with constant η(P) &lt; 1 (guaranteed by δ(P) &lt; 1). By the Banach Fixed-Point Theorem:
+
+1. **Existence and uniqueness:** T has a unique fixed point μ* ∈ P(S), i.e., Tμ* = μ* (equivalently, μ* is the unique stationary distribution of P).
+
+2. **Exponential convergence:** For any μ₀ ∈ P(S):
+
+$$W_1(T^n μ_0, μ^*) = W_1(T^n μ_0, T^n μ^*) \leq \eta(P)^n \cdot W_1(μ_0, μ^*) \leq \delta(P)^n \cdot W_1(μ_0, μ^*)$$
+
+The convergence rate is η(P) ≤ δ(P) &lt; 1, giving exponential decay. □
+
+### Proof of Theorem 2
+
+**Proof.** We prove the two bounds separately.
+
+**Total variation bound.** Let P be irreducible and aperiodic with stationary distribution μ* (which has μ*ᵢ &gt; 0 for all i by irreducibility). The eigenvalues of P are 1 = λ₁, λ₂, ..., λ_N with |λₖ| ≤ |λ₂| for k ≥ 2.
+
+The spectral decomposition of Pⁿ gives:
+
+$$P^n_{ij} = μ^*_j + \sum_{k=2}^N λ_k^n \cdot r_k(i) \cdot l_k(j)$$
+
+where rₖ and lₖ are the right and left eigenvectors of P for eigenvalue λₖ, normalized so that the spectral decomposition holds.
+
+For the n-th iterate of the initial distribution μ₀:
+
+$$(T^n μ_0)_j - μ^*_j = \sum_i (μ_0)_i (P^n_{ij} - μ^*_j) = \sum_{k=2}^N λ_k^n \left(\sum_i (μ_0)_i r_k(i)\right) l_k(j)$$
+
+Taking the total variation norm:
+
+$$\|T^n μ_0 - μ^*\|_{TV} = \frac{1}{2}\sum_j |(T^n μ_0)_j - μ^*_j| \leq |λ_2|^n \cdot C(μ_0) = (1-γ)^n \cdot C(μ_0)$$
+
+where C(μ₀) = (1/2) Σₖ₌₂ᴺ |Σᵢ (μ₀)ᵢ rₖ(i)| · ‖lₖ‖₁ depends on the initial condition and eigenvector structure.
+
+**W₂ bound from TV.** By the standard comparison between Wasserstein and total variation distances on finite metric spaces:
+
+$$W_p(μ, ν) \leq \text{diam}(S) \cdot \|μ - ν\|_{TV}^{1/p}$$
+
+For p = 2:
+
+$$W_2(T^n μ_0, μ^*) \leq \text{diam}(S) \cdot \|T^n μ_0 - μ^*\|_{TV}^{1/2} \leq \text{diam}(S) \cdot \sqrt{C(μ_0)} \cdot (1-γ)^{n/2}$$
+
+Setting D = diam(S) · √(C(μ₀)) completes the proof. □
+
+**Remark.** The W₂ convergence rate (1-γ)^{1/2} is slower than the TV convergence rate (1-γ) due to the square root in the comparison inequality. Our experiments confirm that empirical W₂ rates are systematically slower than |λ₂| = 1 - γ (see Figure 2), consistent with this bound.
+
+### Proof of Theorem 3
+
+**Proof.** Consider a (K, ε)-metastable transition matrix P on N = KM states. By the block structure, P can be written as:
+
+$$P = (1 - \varepsilon) \cdot P_{\text{intra}} + \varepsilon \cdot P_{\text{inter}}$$
+
+where P_intra is block-diagonal (within-cluster transitions) and P_inter encodes between-cluster transitions.
+
+**Step 1: Eigenvalue structure.** Each cluster Cₖ contributes a uniform stationary distribution locally. The block structure means P has eigenvalue 1 with a K-fold quasi-degeneracy: there are K eigenvalues near 1, split by the inter-cluster coupling.
+
+**Step 2: Perturbation analysis.** At ε = 0, P_intra has K eigenvalues equal to 1 (one per cluster) and all others equal to 0 (for the uniform-within-cluster model where P_intra = (1/M) · 1₁ₘ for each block). Under perturbation by ε · P_inter, the K-fold eigenvalue 1 splits.
+
+The effective inter-cluster transition matrix is the K × K stochastic matrix Q where:
+
+$$Q_{kl} = \frac{1}{|C_k|} \sum_{i \in C_k, j \in C_l} P_{ij}$$
+
+For our metastable structure with uniform inter-cluster coupling:
+
+$$Q_{kl} = \begin{cases} 1 - \varepsilon + \varepsilon/K &amp; \text{if } k = l \\ \varepsilon/K &amp; \text{if } k \neq l \end{cases} = (1 - \varepsilon) I_K + \varepsilon \cdot \mathbf{1}\mathbf{1}^T/K$$
+
+This matrix has eigenvalues:
+- λ₁ = 1 (eigenvector: (1, ..., 1))
+- λ₂ = ... = λ_K = 1 - Kε/(K-1) (eigenvectors: orthogonal to (1,...,1))
+
+Wait — let us compute more carefully. For Q = (1-ε)I + (ε/K)·11ᵀ:
+
+For eigenvector v ⊥ 1: Qv = (1-ε)v + (ε/K)·(1ᵀv)·1 = (1-ε)v (since 1ᵀv = 0).
+
+So λ₂ = ... = λ_K = 1 - ε.
+
+Hmm, but our construction has P_{ij} = ε/(N-M) for between-cluster, which when aggregated gives:
+
+$$Q_{kl} = M \cdot \frac{\varepsilon}{N - M} = \frac{M\varepsilon}{M(K-1)} = \frac{\varepsilon}{K-1} \quad \text{for } k \neq l$$
+
+$$Q_{kk} = 1 - (K-1) \cdot \frac{\varepsilon}{K-1} = 1 - \varepsilon$$
+
+So Q = (1-ε)I + ε·(11ᵀ/K - I) + ε·I - ε·11ᵀ/K + ε·11ᵀ/(K-1) ...
+
+Let me redo this. With Q_{kk} = 1 - ε and Q_{kl} = ε/(K-1) for k ≠ l:
+
+For v ⊥ 1: Qv_k = (1-ε)v_k + (ε/(K-1)) Σ_{l≠k} v_l = (1-ε)v_k + (ε/(K-1))(-v_k) = (1 - ε - ε/(K-1))v_k = (1 - Kε/(K-1))v_k.
+
+So λ₂ = 1 - Kε/(K-1).
+
+**Step 3: Spectral gap.** The spectral gap of P is determined by the second eigenvalue of Q (since within-cluster eigenvalues are 0 for the uniform model):
+
+$$\gamma(P) = 1 - |λ_2| = \frac{K\varepsilon}{K-1}$$
+
+For K = 3, ε = 0.05: γ = 3·0.05/2 = 0.075, matching our numerical result exactly.
+
+**Step 4: Mixing time.** By the standard spectral mixing time bound:
+
+$$t_{mix}(\delta) \leq \frac{1}{\gamma} \log\left(\frac{1}{\delta \cdot \min_i μ^*_i}\right) = \frac{K-1}{K\varepsilon} \log\left(\frac{N}{\delta}\right)$$
+
+using μ*ᵢ = 1/N for the uniform stationary distribution. □
+
+### Proof of Theorem 4
+
+**Proof.** Consider the family P(ε) with metastable structure. The key observation is that the dynamics exhibit qualitatively different behavior depending on the ratio of the inter-cluster spectral gap γ_inter = Kε/(K-1) to the intra-cluster spectral gap γ_intra.
+
+**Regime 1: ε &lt; γ_intra/K (metastable regime).** The inter-cluster mixing is much slower than intra-cluster mixing. The spectral gap is γ = Kε/(K-1) ≪ γ_intra. Dynamics proceed in two phases:
+- Fast phase (t = O(1/γ_intra)): Distribution equilibrates within each cluster.
+- Slow phase (t = O(1/γ_inter) = O((K-1)/(Kε))): Distribution mixes between clusters.
+
+During the slow phase, the W₂ decay is governed by the small spectral gap, giving effective convergence rate 1 - Kε/(K-1) ≈ 1 for small ε. On intermediate timescales, this appears as slow (quasi-power-law) convergence.
+
+**Regime 2: ε &gt; γ_intra/K (well-mixed regime).** The inter-cluster coupling is strong enough that cluster structure is dynamically irrelevant. The spectral gap is γ ≈ γ_intra (bounded away from 0), giving rapid exponential convergence.
+
+**Critical coupling.** The crossover occurs at:
+
+$$\varepsilon_c = \frac{(K-1)\gamma_{\text{intra}}}{K}$$
+
+Below this threshold, the time to global mixing scales as 1/ε; above it, mixing time is O(1/γ_intra) independent of ε. This crossover is smooth (not a sharp phase transition) since all quantities are analytic in ε. □
+
+### Proof of Proposition 1
+
+**Proof.** For a bistable system with N/2 states per basin and inter-basin coupling c:
+
+The effective 2×2 inter-basin transition matrix is:
+
+$$Q = \begin{pmatrix} 1 - c &amp; c \\ c &amp; 1 - c \end{pmatrix}$$
+
+with eigenvalues λ₁ = 1, λ₂ = 1 - 2c. So |λ₂| = |1 - 2c| and γ = min(2c, 2-2c).
+
+For c &lt; 1/2 (subcritical): |λ₂| = 1 - 2c, so the time for different initial conditions to converge is t ~ 1/(2c). When c &lt; c_crit = γ_intra/2, the inter-basin mixing is the bottleneck.
+
+For c &gt; c_crit: The intra-basin dynamics are the bottleneck, and convergence time is O(1/γ_intra). □
+
+## 6. Computational Verification
+
+### 6.1 Experiment 1: Contractive Regime
+
+We constructed transition matrices P(α) = (1-α)I + (α/N)·11ᵀ with N = 10 states and α ∈ {0.1, 0.3, 0.5, 0.7, 0.9}. These have δ(P) = 1-α and γ = α exactly.
+
+**Results:**
+
+| α | Dobrushin δ(P) | Spectral γ | Predicted rate (1-α) | Empirical W₂ rate |
+|---|----------------|------------|----------------------|-------------------|
+| 0.1 | 0.9000 | 0.1000 | 0.9000 | 0.9473 |
+| 0.3 | 0.7000 | 0.3000 | 0.7000 | 0.8350 |
+| 0.5 | 0.5000 | 0.5000 | 0.5000 | 0.7019 |
+| 0.7 | 0.3000 | 0.7000 | 0.3000 | 0.5415 |
+| 0.9 | 0.1000 | 0.9000 | 0.1000 | 0.3112 |
+
+**Observation:** The empirical W₂ convergence rate is consistently larger (slower) than the predicted rate 1-γ, consistent with the bound W₂ ~ (1-γ)^{n/2} from Theorem 2. The empirical rates approximately satisfy empirical ≈ √(1-γ), confirming the square-root relationship.
+
+Verification: √(1-0.1) = √0.9 ≈ 0.949 vs empirical 0.947; √(1-0.3) = √0.7 ≈ 0.837 vs empirical 0.835. The match is excellent.
+
+### 6.2 Experiment 2: Metastable Regime
+
+We constructed (K=3, ε)-metastable chains with M=5 states per cluster (N=15 total).
+
+**Results:**
+
+| ε | Spectral gap γ | Predicted γ = 3ε/2 | Convergence rate |
+|---|----------------|---------------------|------------------|
+| 0.01 | 0.0150 | 0.0150 | 0.9924 |
+| 0.05 | 0.0750 | 0.0750 | 0.9617 |
+| 0.10 | 0.1500 | 0.1500 | 0.9219 |
+| 0.20 | 0.3000 | 0.3000 | 0.8365 |
+| 0.50 | 0.7500 | 0.7500 | 0.4994 |
+
+**Observation:** The predicted spectral gap γ = Kε/(K-1) = 3ε/2 matches the computed values exactly (to machine precision), confirming Theorem 3. The convergence is always exponential (R² ≈ 1.0 for exponential fit), but the rate approaches 1 as ε → 0, making convergence arbitrarily slow.
+
+### 6.3 Experiment 3: Phase Transition
+
+We varied ε from 10⁻³ to 1 on a logarithmic grid (30 points) for the (3, ε)-metastable model.
+
+**Finding:** Exponential convergence (R² &gt; 0.99) dominates across the entire range. This confirms the mathematical result that convergence is always exponential for finite irreducible Markov chains — there is no true power-law regime. However, for small ε, the exponential rate (1 - 3ε/2) is so close to 1 that on any practical time horizon, the behavior is indistinguishable from slow power-law decay.
+
+The crossover point where power-law fit becomes competitive (but still inferior) is at ε ≈ 0.62, with spectral gap γ ≈ 0.93.
+
+### 6.4 Experiment 4: Spectral Gap Correlation
+
+We generated 30 random stochastic matrices with varying mixing properties and measured both the predicted convergence rate (1-γ) and empirical W₂ decay rate.
+
+**Result:** Pearson correlation r = 0.979 (p &lt; 10⁻²⁰). The linear fit gives empirical_rate ≈ 0.74·(1-γ) + 0.28, confirming a strong monotone relationship. The empirical rates are systematically higher than 1-γ, consistent with the W₂ bound being (1-γ)^{1/2} rather than (1-γ).
+
+### 6.5 Experiment 5: Bifurcation
+
+We constructed bistable chains with two basins of 5 states each, varying the inter-basin coupling c.
+
+**Results:**
+
+| Coupling c | Spectral gap | Final W₂(μ₁, μ₂) | Converged? |
+|------------|-------------|-------------------|------------|
+| 0.001 | 0.0020 | 7.356 | No (200 steps insufficient) |
+| 0.010 | 0.0200 | 0.821 | Partial |
+| 0.050 | 0.1000 | 0.000 | Yes |
+| 0.100 | 0.2000 | 0.000 | Yes |
+| 0.300 | 0.3996 | 0.000 | Yes |
+| 0.500 | 0.5712 | 0.000 | Yes |
+
+**Observation:** For c ≤ 0.01, the two initial conditions remain separated after 200 steps, demonstrating the quasi-metastable trapping. For c ≥ 0.05, convergence to the unique stationary distribution occurs well within the time horizon, consistent with Proposition 1.
+
+### 6.6 Experiment 6: Complexity Scaling
+
+For fixed ε = 0.05 and M = 4, we varied K ∈ {2, 3, 4, 5, 6, 8}.
+
+**Results:**
+
+| K | N = KM | Spectral gap γ | γ_predicted = Kε/(K-1) | Mixing time |
+|---|--------|----------------|------------------------|-------------|
+| 2 | 8 | 0.1000 | 0.1000 | 19 |
+| 3 | 12 | 0.0750 | 0.0750 | 25 |
+| 4 | 16 | 0.0667 | 0.0667 | 28 |
+| 5 | 20 | 0.0625 | 0.0625 | 27 |
+| 6 | 24 | 0.0600 | 0.0600 | 27 |
+| 8 | 32 | 0.0571 | 0.0571 | 24 |
+
+**Observation:** As K → ∞, γ → ε (since Kε/(K-1) → ε), so the spectral gap saturates. The mixing time shows sub-linear growth with K, stabilizing around 25-28 steps for this parameterization. The predicted spectral gaps match exactly.
+
+## 7. Discussion
+
+### 7.1 Exponential vs. Power-Law Convergence
+
+A key finding is that convergence of CoT iterations on finite state spaces is **always exponential**, governed by the spectral gap of the transition operator. The appearance of power-law convergence (as suggested by Kim et al. 2025&#39;s hitting time Θ̃(KM/ε)) arises from two distinct mechanisms:
+
+1. **Near-unit eigenvalues:** In the metastable regime (small ε), the convergence rate 1 - γ ≈ 1 - Kε/(K-1) is very close to 1. On any finite time horizon, this slow exponential is practically indistinguishable from a power law. The Kim et al. hitting time result is consistent because their hitting time characterizes a different quantity (first passage to a target state, not distributional convergence).
+
+2. **Multi-scale dynamics:** The separation between within-cluster and between-cluster timescales creates an apparent two-phase convergence: fast initial convergence (within-cluster equilibration) followed by slow convergence (between-cluster mixing). This multi-scale behavior can mimic power-law decay on intermediate timescales.
+
+### 7.2 Spectral Gap as the Fundamental Quantity
+
+Our computational experiments confirm with high confidence (r = 0.979) that the spectral gap γ is the fundamental determinant of convergence speed. The relationship between γ and convergence rate is:
+
+- **In total variation:** rate = 1 - γ exactly (asymptotically)
+- **In W₂:** rate ≈ (1 - γ)^{1/2}, verified empirically (e.g., α=0.1: √0.9 ≈ 0.949 vs empirical 0.947)
+
+This square-root relationship is a consequence of the comparison inequality between W₂ and TV on finite metric spaces.
+
+### 7.3 Connection to Prior Work
+
+- **Kim et al. (2025):** Their Θ̃(KM/ε) hitting time is consistent with our spectral gap γ = Kε/(K-1), since the mixing time is O(1/γ) = O((K-1)/(Kε)). For large M (many states per cluster), the hitting time to a specific state scales with M as well, giving the KM/ε dependence.
+
+- **Ke et al. (2024):** Their exponential convergence K^L for looped networks corresponds exactly to our Theorem 1, where K &lt; 1 is the Dobrushin/Wasserstein contraction coefficient.
+
+- **Cheng et al. (2024):** Their JKO convergence in W₂ under λ-convexity parallels our Theorem 2, but applies to continuous-space gradient flows rather than discrete Markov chains.
+
+- **Shukla &amp; Joshi (2025):** Their eigenvalue classification of convergence regimes (exponential, oscillatory, boundary) corresponds to our spectral characterization, adapted from continuous SDEs to discrete Markov operators.
+
+### 7.4 Implications for CoT Prompting
+
+1. **Number of reasoning steps:** The required number of CoT steps scales as O(1/γ · log(1/δ)) for accuracy δ. For metastable problems with K reasoning stages and inter-stage coupling ε, this is O((K-1)/(Kε) · log(1/δ)).
+
+2. **Problem difficulty:** Harder problems (larger K, smaller ε) increase the required steps predictably via the spectral gap.
+
+3. **Diminishing returns:** Due to exponential convergence, the marginal benefit of each additional CoT step decreases geometrically, suggesting an optimal stopping time.
+
+4. **Multiple solutions:** When the transition operator has multiple near-fixed-points (metastable clusters), the CoT process may converge to incorrect fixed points depending on initialization — explaining why prompt engineering matters for directing reasoning toward correct solution paths.
+
+### 7.5 Limitations
+
+1. **Finite state space assumption:** We work with finite S, whereas real token spaces are combinatorially large. Our results apply rigorously to the embedded representation space after dimensionality reduction (cf. Carson &amp; Reisizadeh 2025&#39;s rank-40 projection).
+
+2. **Markov assumption:** Real CoT has long-range dependencies; our Markov model is an approximation. Extensions to higher-order Markov chains or hidden Markov models would strengthen the framework.
+
+3. **Stationary transition kernel:** We assume P is fixed, but in practice the LLM&#39;s effective transition kernel changes with context. A time-varying kernel analysis would be needed for non-stationary reasoning.
+
+4. **W₂ vs. W₁:** Our sharpest contraction results (Lemma 2) are for W₁. The W₂ bound via TV comparison loses a square root, which may not be tight.
+
+## 8. Open Questions
+
+1. **Tight W₂ contraction.** Can one prove W₂(Tμ, Tν) ≤ κ · W₂(μ, ν) directly without going through TV? This would give sharper bounds with rate κ instead of √κ.
+
+2. **Non-Markovian extensions.** How do convergence rates change when the transition kernel depends on the full history? Memory kernels or fractional dynamics may yield genuinely power-law convergence.
+
+3. **Continuous limit.** In the limit N → ∞ with appropriate scaling, does the discrete Markov framework converge to the SDE/Fokker-Planck models of Carson (2025)?
+
+4. **Optimal transition kernels.** Given a target stationary distribution μ*, what transition kernel P minimizes the mixing time? This connects to the design of optimal prompting strategies.
+
+5. **Non-reversible acceleration.** Non-reversible Markov chains can mix faster than reversible ones. Can non-reversible CoT reasoning strategies (e.g., guided search) provably accelerate convergence?
+
+## 9. Conclusions
+
+We established a rigorous mathematical framework for analyzing chain-of-thought reasoning as a discrete dynamical system. Our main contributions are:
+
+1. **Theorem 1:** Exponential convergence W₁(Tⁿμ₀, μ*) ≤ δ(P)ⁿ · W₁(μ₀, μ*) under Dobrushin contraction.
+
+2. **Theorem 2:** Spectral characterization: W₂ convergence rate is (1-γ)^{1/2}, verified empirically with r = 0.979 correlation.
+
+3. **Theorem 3:** Explicit spectral gap γ = Kε/(K-1) for metastable chains, matching numerical computation exactly.
+
+4. **Theorem 4:** Phase transition at ε_c = (K-1)γ_intra/K between slow and fast convergence regimes.
+
+The framework provides a principled basis for understanding when and why iterative reasoning converges, with explicit dependence on problem structure (K clusters, coupling ε) and the spectral properties of the underlying transition operator.
+
+## 10. References
+
+1. Kim, Wu, Lee, Suzuki. &#34;Metastable Dynamics of Chain-of-Thought Reasoning.&#34; arXiv:2502.01694, 2025.
+2. Carson. &#34;A Stochastic Dynamical Theory of LLM Self-Adversariality.&#34; arXiv:2501.16783, 2025.
+3. Carson, Reisizadeh. &#34;A Statistical Physics of Language Model Reasoning.&#34; arXiv:2506.04374, 2025.
+4. Bai, Kolter, Koltun. &#34;Deep Equilibrium Models.&#34; arXiv:1909.01377, 2019.
+5. Ke et al. &#34;Fixed Point Iterations in Deep Neural Networks.&#34; arXiv:2410.11279, 2024.
+6. Cheng, Lu, Tan, Xie. &#34;Convergence of Flow-Based Generative Models via Proximal Gradient Descent in Wasserstein Space.&#34; arXiv:2310.17582, 2024.
+7. Shukla, Joshi. &#34;SDE Framework for Multi-Objective LLM Interactions.&#34; arXiv:2510.10739, 2025.
+8. Wei et al. &#34;Chain-of-Thought Prompting Elicits Reasoning in Large Language Models.&#34; arXiv:2201.11903, 2022.
+9. Villani. &#34;Optimal Transport: Old and New.&#34; Springer, 2009.
+10. Levin, Peres, Wilmer. &#34;Markov Chains and Mixing Times.&#34; AMS, 2009.
+11. Bovier, Eckhoff, Gayrard, Klein. &#34;Metastability in Reversible Diffusion Processes I.&#34; J. Eur. Math. Soc., 2002.
+12. Dobrushin. &#34;Central Limit Theorem for Non-Stationary Markov Chains.&#34; Theory Prob. Appl., 1956.
+
+
+════════════════════════════════════════════════════════════════════════════════
+                            RESEARCH PLAN
+════════════════════════════════════════════════════════════════════════════════
+
+# Research Plan: Convergence Rates in Chain-of-Thought Reasoning as Discrete Dynamical Systems
+
+## Motivation &amp; Novelty Assessment
+
+### Why This Research Matters
+Chain-of-thought prompting is the dominant technique for improving LLM reasoning, yet lacks rigorous mathematical foundations for understanding *why* and *when* iterative reasoning converges to correct answers. A formal convergence theory would provide: (1) fundamental limits on how many reasoning steps are needed, (2) criteria for when reasoning will succeed vs. fail, and (3) principled design of prompting strategies based on dynamical systems properties.
+
+### Gap in Existing Work
+From the literature review, three critical gaps exist:
+1. **No formal W₂ convergence analysis of CoT.** Cheng et al. (2024) prove exponential convergence in Wasserstein space for flow-based models, but this has not been applied to autoregressive CoT.
+2. **Spectral theory of CoT operators is undeveloped.** Kim et al. (2025) use pseudo-spectral gaps for within-cluster mixing, and Shukla &amp; Joshi (2025) classify convergence by eigenvalues of linearized drift, but no comprehensive spectral characterization of the CoT transition operator exists.
+3. **Power-law vs. exponential convergence regimes are uncharacterized.** Kim et al. show power-law Θ̃(KM/ε) hitting times; Ke et al. and DEQ show exponential K^t convergence. The conditions separating these regimes are unknown.
+
+### Our Novel Contribution
+We provide a unified mathematical framework that:
+1. Formalizes CoT as a Markov operator T on probability measures over an embedded state space with Wasserstein-2 metric
+2. Proves existence/uniqueness of fixed points under explicit contraction conditions
+3. Derives **two distinct convergence regimes** with explicit rate bounds:
+   - Exponential: W₂(T^n μ₀, μ*) ≤ κⁿ · W₂(μ₀, μ*) when T is κ-contractive
+   - Power-law: W₂(T^n μ₀, μ*) = O(n^{-α}) in metastable regime with α depending on spectral gap ratio
+4. Characterizes the phase transition between regimes via a critical contraction parameter
+5. Validates predictions computationally on synthetic Markov chain models
+
+### Experiment Justification
+- **Experiment 1 (Contractive regime simulation):** Verify exponential convergence rate prediction W₂ ~ κⁿ by constructing a toy contractive Markov operator and measuring convergence.
+- **Experiment 2 (Metastable regime simulation):** Verify power-law convergence by constructing a metastable Markov chain with cluster structure and measuring W₂ decay.
+- **Experiment 3 (Phase transition):** Vary contraction parameter across critical threshold to observe transition between exponential and power-law regimes.
+- **Experiment 4 (Spectral gap validation):** Compute spectral gaps of transition matrices and verify predicted relationship to convergence rates.
+
+## Research Question
+Can the convergence behavior of chain-of-thought reasoning be rigorously characterized as a discrete dynamical system, with explicit convergence rate bounds determined by spectral properties of the transition operator?
+
+## Hypothesis Decomposition
+
+### Sub-hypothesis 1: Well-posedness
+The CoT transition operator T: P₂(X) → P₂(X) is well-defined on the Wasserstein-2 space of probability measures over an appropriate state space X, and preserves finite second moments.
+
+### Sub-hypothesis 2: Fixed-point existence
+Under appropriate conditions on the transition kernel, T admits at least one fixed point μ* ∈ P₂(X). Under stronger contraction conditions, the fixed point is unique.
+
+### Sub-hypothesis 3: Exponential convergence
+When T is κ-contractive in W₂ (κ &lt; 1), iterates converge exponentially: W₂(Tⁿμ₀, μ*) ≤ κⁿ · W₂(μ₀, μ*).
+
+### Sub-hypothesis 4: Power-law convergence in metastable regime
+When the state space has metastable cluster structure with K clusters and within-cluster mixing time proportional to M/ε, the W₂ convergence follows a power-law: W₂(Tⁿμ₀, μ*) = O(n^{-1/2} · (KM/ε)^{1/2}).
+
+### Sub-hypothesis 5: Spectral characterization
+The convergence rate is determined by the spectral gap γ of T: exponential rate = 1 - γ in the contractive regime, and the ratio of inter-cluster to intra-cluster spectral gaps determines the power-law exponent.
+
+## Proposed Methodology
+
+### Approach
+Model CoT reasoning on a finite state space S (representing embedded reasoning states) with a transition kernel defining operator T. Work in discrete probability space with earth mover&#39;s distance (discrete W₁ or W₂). This avoids the difficulty of continuous Wasserstein space on token sequences while preserving the essential dynamical structure.
+
+### Proof Strategy
+1. **Definitions:** State space, transition operator, Wasserstein metric on finite spaces
+2. **Lemma 1 (Well-posedness):** T maps P(S) to P(S), is continuous in W₂
+3. **Lemma 2 (Contraction):** Under Dobrushin coefficient &lt; 1, T is W₁-contractive
+4. **Theorem 1 (Exponential convergence):** Banach fixed-point theorem gives unique fixed point with exponential convergence
+5. **Theorem 2 (Spectral decomposition):** Relate convergence rate to second-largest eigenvalue of transition matrix
+6. **Theorem 3 (Metastable regime):** For block-structured transition matrices with weak inter-block coupling, derive power-law W₂ convergence bounds
+7. **Theorem 4 (Phase transition):** Characterize critical coupling strength separating exponential from power-law regimes
+
+### Computational Verification
+- Construct explicit transition matrices for toy CoT models
+- Compute eigenvalues, Dobrushin coefficients, and spectral gaps
+- Simulate Markov chains and measure W₂ convergence rates
+- Fit convergence curves to verify exponential vs. power-law predictions
+
+### Evaluation Metrics
+- Spectral gap of transition operator (computed exactly for small systems)
+- Dobrushin contraction coefficient
+- W₂ distance decay rate (measured from simulation)
+- Goodness-of-fit (R²) for exponential and power-law models
+
+## Timeline
+- Phase 1 (Planning): 15 min ✓
+- Phase 2 (Setup &amp; Definitions): 15 min
+- Phase 3 (Proof Construction): 90 min
+- Phase 4 (Computational Verification): 45 min
+- Phase 5 (Refinement): 20 min
+- Phase 6 (Documentation): 25 min
+
+## Potential Challenges
+1. Dobrushin contraction may be too restrictive — may need weaker Lyapunov conditions
+2. Power-law convergence bounds may be loose — tightness analysis needed
+3. Phase transition may not be sharp — could be a crossover region
+4. Discrete W₂ computation is O(n³) — limit state space size
+
+## Success Criteria
+- At least 2 rigorous theorems with complete proofs
+- Computational verification showing predicted rates match simulation
+- Clear characterization of at least 2 convergence regimes
+
+
+════════════════════════════════════════════════════════════════════════════════
+                          LITERATURE REVIEW
+════════════════════════════════════════════════════════════════════════════════
+
+## Literature Review: Convergence Rates in Chain-of-Thought Reasoning as Discrete Dynamical Systems
+
+### Research Area Overview
+
+This review surveys the mathematical foundations for modeling chain-of-thought (CoT) prompting as a discrete dynamical system on probability distributions over token sequences. The research hypothesis posits that iterative reasoning steps exhibit measurable convergence rates to fixed points (correct solutions), following power-law or exponential decay patterns characterized by spectral properties of transition operators. The relevant literature spans four areas: (1) dynamical systems models of LLM reasoning, (2) fixed-point theory in deep networks, (3) convergence in Wasserstein space, and (4) spectral analysis of Markov chains/transition operators.
+
+---
+
+### Key Definitions
+
+**Definition 1 (Chain-of-Thought as Markov Chain).** CoT generation is modeled as a discrete-time Markov chain $X^\varepsilon = (X^\varepsilon_t)_{t \geq 0}$ on a finite state space $\mathcal{S}$ of logical assertions, with transition kernel $p^\varepsilon$ parametrized by a difficulty parameter $\varepsilon &gt; 0$. States represent sentences or mathematical expressions; transitions represent reasoning steps. (Kim, Wu, Lee, Suzuki 2025)
+
+**Definition 2 (Metastable System).** A subset $\mathcal{M} \subset \mathcal{S}$ is metastable if $\lim_{\varepsilon \to 0} \sup_{x \in \mathcal{M}, y \notin \mathcal{M}} P_x(\bar{\tau}^\varepsilon_{\mathcal{M}\setminus\{x\}} &lt; \bar{\tau}^\varepsilon_x) / P_y(\bar{\tau}^\varepsilon_{\mathcal{M}} &lt; \bar{\tau}^\varepsilon_y) = 0$. That is, returning to $\mathcal{M}$ is much easier than transitioning between states in $\mathcal{M}$. (Bovier et al. 2002, applied in Kim et al. 2025)
+
+**Definition 3 (Severity SDE).** An instantaneous severity variable $x(t) \in [0,1]$ evolves under $dx(t) = \mu(x(t))\,dt + \sigma(x(t))\,dW(t)$, where $\mu(x) = \alpha x(1-x) - \beta x^2 + \gamma$ (logistic self-reinforcement minus alignment damping), and $\sigma(x) = \sigma_0 + \sigma_1 x$. (Carson 2025)
+
+**Definition 4 (Sentence-Stride Process).** The discrete sequence $\{h_t\}_{t \in \mathbb{N}}$ obtained by extracting the final-layer transformer state at each sentence boundary, modeling mesoscopic semantic-level reasoning dynamics. (Carson &amp; Reisizadeh 2025)
+
+**Definition 5 (Regime-Switching SDE).** Let $Z(t) \in \{1,\ldots,K\}$ be a latent continuous-time Markov chain with rate matrix $\mathbf{T}$. The regime-switching Ito SDE is $dh(t) = \mu_{Z(t)}(h(t))\,dt + B_{Z(t)}(h(t))\,dW(t)$, with per-regime drift and diffusion. (Carson &amp; Reisizadeh 2025)
+
+**Definition 6 (Deep Equilibrium Model).** The fixed point $z^*_{1:T} = f_\theta(z^*_{1:T}; x_{1:T})$ of a weight-tied deep sequence model, corresponding to the limit of infinite-depth iteration. (Bai, Kolter, Koltun 2019)
+
+**Definition 7 (Wasserstein-2 Distance).** $W_2^2(\mu, \nu) := \inf_{\pi \in \Pi(\mu,\nu)} \int \|x - y\|^2\,d\pi(x,y)$, where $\Pi(\mu,\nu)$ is the set of all couplings. (Villani 2009)
+
+**Definition 8 ($\lambda$-Convexity Along Generalized Geodesics).** A functional $\phi$ on $\mathcal{P}_2(\mathbb{R}^d)$ is $\lambda$-convex a.g.g. if $\phi(\mu^{1 \to 2}_t) \leq (1-t)\phi(\mu_1) + t\phi(\mu_2) - \frac{\lambda}{2}t(1-t)W^2_\nu(\mu_1,\mu_2)$. (Cheng, Lu, Tan, Xie 2024)
+
+**Definition 9 (Pseudo-Spectral Gap).** For a stochastic complement $S^\varepsilon_{kk}$, the pseudo-spectral gap $\gamma^\dagger(S^\varepsilon_{kk}) \geq \gamma &gt; 0$ controls within-cluster mixing time. (Kim et al. 2025)
+
+**Definition 10 (Looped Neural Network).** Given weight matrix $W$, bias $b$, activation $g$, define $f(x; W, b) := g(Wx + b)$ and iterate $x^{(t)} := f(x^{(t-1)}; W, b)$ for $t \in [L]$. (Ke et al. 2024)
+
+---
+
+### Key Papers
+
+#### Paper 1: Metastable Dynamics of Chain-of-Thought Reasoning (Kim, Wu, Lee, Suzuki, 2025)
+- **arXiv:** 2502.01694
+- **Main Results:**
+  - **Theorem 3.2 (Expected Hitting Time):** Under metastability assumptions, $\mathbb{E}[\tau^\varepsilon_{X_{\text{out}}}] = \tilde{\Theta}(KM/\varepsilon)$ where $K$ = number of reasoning clusters, $M$ = cluster size, $\varepsilon$ = sparse edge probability. This is a **power-law** rate in $1/\varepsilon$.
+  - **Theorem 4.3 (Distilled CoT):** Distilled meta-chain achieves $\mathbb{E}[\tau^+] = O(K)$, eliminating dependence on $\varepsilon$ and $M$.
+  - **Corollary 5.6 (Hardness):** Without global search, any parametric model requires $\exp(\Omega(K))$ queries — exponential lower bound.
+- **Proof Techniques:** Stochastic complement decomposition, metastability theory (Bovier et al.), SQ dimension analysis, PPO-Clip convergence analysis.
+- **Relevance:** Directly models CoT as a Markov chain with metastable clusters, proving power-law convergence rates. Most directly relevant paper to our hypothesis.
+
+#### Paper 2: A Stochastic Dynamical Theory of LLM Self-Adversariality (Carson, 2025)
+- **arXiv:** 2501.16783
+- **Main Results:**
+  - Fokker-Planck equation for probability density over severity: $\partial_t P = -\partial_x[\mu(x)P] + \frac{1}{2}\partial_x^2[\sigma^2(x)P]$
+  - Stationary distribution: $P_{\text{ss}}(x) \propto \frac{1}{\sigma^2(x)}\exp\left(2\int_0^x \frac{\mu(z)}{\sigma^2(z)}\,dz\right)$
+  - Phase transition at $\alpha = \beta$: subcritical (convergent, self-correcting) vs. supercritical (runaway)
+  - Scaling laws near criticality: $\xi(\Delta) \sim |\Delta|^{-\nu}$, $\tau(\Delta) \sim |\Delta|^{-z\nu}$
+- **Proof Techniques:** SDE/Fokker-Planck analysis, potential landscape analysis, nonequilibrium phase transition theory.
+- **Relevance:** Provides the continuous-time SDE framework for modeling CoT as a dynamical process, with explicit convergence/divergence criteria.
+
+#### Paper 3: A Statistical Physics of Language Model Reasoning (Carson &amp; Reisizadeh, 2025)
+- **arXiv:** 2506.04374
+- **Main Results:**
+  - Rank-40 PCA projection captures ~50% variance of sentence-level hidden state trajectories
+  - 4 latent reasoning regimes identified via GMM on projected residuals
+  - SLDS model achieves $R^2 \approx 0.74$ for one-step-ahead prediction (vs. 0.51 for single linear model)
+  - Projection leakage bound: $\mathcal{L}_k(\varepsilon) \leq L_\mu \varepsilon / \mu_{\min}$
+- **Proof Techniques:** Ito SDE well-posedness via Picard iteration, Davis-Kahan perturbation theory for PCA stability, EM algorithm for SLDS fitting.
+- **Relevance:** Empirically validates the SDE framework across 8 models and 7 benchmarks, providing the regime-switching model that captures distinct reasoning phases.
+
+#### Paper 4: Deep Equilibrium Models (Bai, Kolter, Koltun, 2019)
+- **arXiv:** 1909.01377
+- **Main Results:**
+  - **Theorem 1 (Gradient):** $\frac{d\ell}{d(\cdot)} = -\frac{d\ell}{dz^*} J^{-1}_{g_\theta}\big|_{z^*} \frac{df_\theta}{d(\cdot)}$ via implicit differentiation
+  - **Theorem 2 (Universality):** Stacking DEQs does not add representational power
+  - Convergence depends on contractivity: spectral radius of Jacobian $J_{f_\theta} &lt; 1$
+- **Proof Techniques:** Implicit function theorem, Broyden&#39;s method with Sherman-Morrison updates.
+- **Relevance:** Provides the fixed-point framework for modeling transformer inference as convergence to equilibrium, with spectral radius as the key convergence parameter.
+
+#### Paper 5: Fixed Point Iterations in Deep Neural Networks (Ke et al., 2024)
+- **arXiv:** 2410.11279
+- **Main Results:**
+  - **Theorem 4.1 (Multiple Fixed Points):** Looped neural networks can have at least $m$ fixed points with exponential convergence $\|x^{(L)} - p_i\|_\infty \leq K_i^L \cdot c_i \cdot \varepsilon_i$ where $K_i &lt; 1$.
+  - **Theorem 4.2 (Perturbed Iteration):** With noise $|h(x)| \leq 1/m$: $|x^{(t)} - p| \leq K^t|x^{(0)} - p| + 20/m$ — exponential decay to noise floor.
+  - Up to $2^d$ robust fixed points with polynomial/exponential activations.
+- **Proof Techniques:** Banach contraction mapping theorem, Jacobian-based contractivity verification.
+- **Relevance:** Establishes exponential convergence rates for fixed-point iterations in neural networks, with explicit spectral (contractivity) conditions.
+
+#### Paper 6: Convergence of Flow-Based Generative Models in Wasserstein Space (Cheng et al., 2024)
+- **arXiv:** 2310.17582
+- **Main Results:**
+  - JKO proximal gradient descent in $W_2$ achieves **exponential convergence**: both $W_2(p_n, q)$ and $G(p_n) - G(q)$ decay exponentially
+  - $N \leq O(\log(1/\varepsilon))$ JKO steps suffice for $O(\varepsilon^2)$ KL error
+  - $\lambda$-convexity along generalized geodesics is the key structural condition
+- **Proof Techniques:** Wasserstein proximal operator analysis, Brenier theorem, data processing inequality.
+- **Relevance:** Provides rigorous convergence rates in Wasserstein space for iterative schemes — the mathematical framework for our hypothesis about convergence on probability distributions.
+
+#### Paper 7: SDE Framework for Multi-Objective LLM Interactions (Shukla &amp; Joshi, 2025)
+- **arXiv:** 2510.10739
+- **Main Results:**
+  - Convergence rate $\rho = -\text{Re}(\lambda_{\max})$ where $\lambda_{\max}$ is the dominant eigenvalue of drift matrix $A$
+  - Three dynamical regimes: exponential convergence ($\lambda_i$ real negative), oscillatory ($\lambda$ complex), boundary attraction ($\lambda \approx 0$)
+  - Discrete stability: $|\lambda_{\text{discrete}}| = |1 + \lambda_{\text{continuous}} \Delta t| &lt; 1$
+- **Proof Techniques:** Euler-Maruyama discretization, eigenvalue classification of linearized drift.
+- **Relevance:** Directly applies spectral analysis of transition operators to classify convergence behavior of iterative LLM processes.
+
+#### Paper 8: Chain-of-Thought Prompting Elicits Reasoning (Wei et al., 2022)
+- **arXiv:** 2201.11903
+- **Relevance:** Foundational paper establishing CoT prompting. Provides empirical evidence that multi-step reasoning improves LLM performance on complex tasks — the phenomenon our mathematical framework aims to explain.
+
+#### Paper 9: Markov Chain of Thought for Efficient Mathematical Reasoning (2024)
+- **arXiv:** 2410.17635
+- **Main Results:** Conceptualizes CoT as a Markov chain with &#34;derive then reduce&#34; logic. Deeper reasoning states converge to irreducible (atomic) forms with stable token counts.
+- **Relevance:** Empirical validation of the Markov chain model for CoT, supporting the discrete dynamical systems perspective.
+
+---
+
+### Known Results (Prerequisite Theorems)
+
+**Theorem (Banach Fixed-Point).** If $f: D \to D$ is contractive with constant $K &lt; 1$, then $f$ has a unique fixed point $p$ and $\|x^{(t)} - p\| \leq K^t/(1-K)\|x^{(1)} - x^{(0)}\|$. *Rate: exponential.*
+
+**Theorem (Fokker-Planck Stationary Distribution).** For SDE $dx = \mu(x)dt + \sigma(x)dW$, the stationary density is $P_{\text{ss}}(x) \propto \sigma^{-2}(x)\exp(2\int_0^x \mu(z)/\sigma^2(z)\,dz)$.
+
+**Theorem (Brenier).** For $\mu \in \mathcal{P}_2^r$ and $\nu \in \mathcal{P}_2$, there exists a unique optimal transport map $T^\nu_\mu = \nabla\phi$ ($\phi$ convex).
+
+**Theorem (Ito SDE Well-Posedness, Oksendal 2003).** Under Lipschitz continuity and linear growth of $\mu$ and $B$, the SDE has a unique strong solution.
+
+**Theorem (Davis-Kahan).** The sine of the angle between empirical and population eigenspaces is bounded by $O(\|\Delta\|/\delta)$ where $\delta$ is the spectral gap, ensuring PCA stability.
+
+**Theorem (JKO Convergence).** Under $\lambda$-convexity a.g.g. of the KL functional, the JKO scheme converges exponentially: $W_2(p_n, q) \leq C \cdot e^{-\lambda n}$ and $\text{KL}(p_n\|q) = O(\varepsilon^2)$ in $N = O(\log(1/\varepsilon))$ steps.
+
+---
+
+### Proof Techniques in the Literature
+
+- **Metastability and stochastic complements** (Kim et al.): Decomposing the state space into clusters with fast within-cluster mixing and slow inter-cluster transitions. Uses pseudo-spectral gaps to bound intra-cluster convergence.
+- **SDE/Fokker-Planck analysis** (Carson): Continuous-time diffusion limits of discrete token generation, potential landscape analysis for phase classification.
+- **Contraction mapping arguments** (Ke et al., Bai et al.): Proving convergence via Jacobian spectral radius bounds; Banach theorem gives exponential rates.
+- **Wasserstein proximal gradient descent** (Cheng et al.): Proving convergence of iterative transport maps using $\lambda$-convexity in $W_2$.
+- **Eigenvalue/spectral decomposition** (Shukla &amp; Joshi): Classifying convergence regimes by the eigenvalue spectrum of the drift matrix.
+- **Regime-switching models** (Carson &amp; Reisizadeh): EM algorithm for SLDS fitting, GMM for latent regime identification.
+
+---
+
+### Related Open Problems
+
+1. **Formal convergence rates for CoT in Wasserstein space.** No existing paper proves that CoT iterates converge in $W_2$ to a fixed-point distribution. The JKO scheme results (Cheng et al.) apply to flow-based models but not directly to autoregressive CoT.
+2. **Spectral characterization of the CoT transition operator.** The pseudo-spectral gap (Kim et al.) controls within-cluster mixing, but the full spectral decomposition of the CoT transition operator — especially its relationship to power-law vs. exponential convergence — remains open.
+3. **Power-law vs. exponential convergence regimes.** Kim et al. show power-law $\tilde{\Theta}(KM/\varepsilon)$ hitting times (suggesting power-law convergence). Ke et al. and DEQ show exponential convergence under contractivity. The conditions determining which regime applies to CoT are not characterized.
+4. **Non-Markovian extensions.** All current models assume (approximate) Markov dynamics. Real CoT involves long-range dependencies. Memory kernels or fractional dynamics may be needed.
+5. **Bridging discrete and continuous models.** The SDE/Fokker-Planck framework (Carson) uses continuous-time limits, while the Markov chain model (Kim et al.) is discrete. A unified framework connecting both with explicit error bounds for the continuous approximation is lacking.
+
+---
+
+### Gaps and Opportunities
+
+- **Gap 1:** No paper directly models CoT on the **Wasserstein space of probability distributions** over token sequences with formal convergence analysis. The hypothesis of this research project fills precisely this gap.
+- **Gap 2:** The spectral theory of CoT transition operators is undeveloped. While spectral gaps appear in metastability theory (Kim et al.) and eigenvalue analysis appears in linearized SDEs (Shukla &amp; Joshi), a comprehensive spectral characterization linking convergence rates to operator properties is missing.
+- **Gap 3:** The relationship between power-law convergence (metastable regime) and exponential convergence (contractive regime) has not been mapped as a function of model/problem parameters.
+
+---
+
+### Recommendations for Proof Strategy
+
+1. **Recommended approach:** Model the CoT reasoning process as a discrete-time Markov operator $\mathcal{T}: \mathcal{P}(\Sigma^*) \to \mathcal{P}(\Sigma^*)$ on the Wasserstein space of distributions over token sequences. Prove convergence to fixed points by establishing contractivity of $\mathcal{T}$ in $W_2$ under appropriate conditions on the transition kernel.
+
+2. **Key lemmas to establish:**
+   - (L1) The CoT operator $\mathcal{T}$ is well-defined on $\mathcal{P}_2(\Sigma^*)$ and preserves finite second moments.
+   - (L2) Spectral decomposition of $\mathcal{T}$ in a suitable function space (e.g., weighted $L^2$), relating eigenvalues to convergence rates.
+   - (L3) Contractivity condition: $W_2(\mathcal{T}\mu, \mathcal{T}\nu) \leq \kappa \cdot W_2(\mu, \nu)$ for $\kappa &lt; 1$, or weaker Lyapunov-type conditions for eventual contractivity.
+   - (L4) Phase transition characterization: explicit conditions on model parameters separating power-law from exponential regimes.
+
+3. **Potential obstacles:**
+   - Token sequences form a discrete space; $W_2$ is typically defined on $\mathbb{R}^d$. Need to either embed sequences in a continuous space (e.g., via transformer hidden states) or use discrete optimal transport.
+   - Non-contractivity in general: CoT operators may not be contractive globally, requiring metastability-based arguments instead.
+   - The high dimensionality of token sequence space may make spectral analysis intractable without dimensionality reduction (cf. rank-40 projection in Carson &amp; Reisizadeh).
+
+4. **Computational support:** Use SymPy for symbolic analysis of spectral properties of simple transition operators; NumPy/SciPy for numerical eigenvalue computation and simulation of toy Markov chains; NetworkX for graph structure of transition kernels.
+
+
+════════════════════════════════════════════════════════════════════════════════
+                          PAPER REQUIREMENTS
+════════════════════════════════════════════════════════════════════════════════
+
+Generate a complete mathematics paper with the following structure:
+
+1. TITLE
+   - Clear, specific, informative
+   - Should convey the main result or the mathematical objects studied
+   - Mathematical convention: concise and precise
+
+2. AUTHOR
+   - Use this exact author line: NeuriCo
+
+3. ABSTRACT (150-250 words)
+   - State the problem or question investigated
+   - Summarize the main results (theorem statements in words)
+   - Mention proof techniques used
+   - Note any computational verification
+
+4. INTRODUCTION
+   - Mathematical problem and motivation
+   - History and context of the problem
+   - Summary of known results (with citations)
+   - Statement of main contributions (informal preview)
+   - Paper organization
+
+5. PRELIMINARIES
+   - Notation and conventions
+   - Definitions needed for the paper
+   - Prerequisite results (stated with citations, not reproved)
+   - This section ensures the paper is self-contained
+
+6. MAIN RESULTS
+   - Formal theorem statements
+   - Complete proofs
+   - Supporting lemmas and propositions with proofs
+   - Examples illustrating the results
+   - Remarks connecting to other areas
+
+7. DISCUSSION
+   - Implications of the results
+   - Connections to related problems
+   - Open questions and conjectures
+   - Possible generalizations
+
+8. CONCLUSION
+   - Summary of contributions
+   - Future directions
+
+9. REFERENCES
+   - BibTeX format
+   - All cited papers and textbooks
+
+════════════════════════════════════════════════════════════════════════════════
+                          OUTPUT FORMAT
+════════════════════════════════════════════════════════════════════════════════
+
+Create a MODULAR LaTeX project with the following directory structure:
+
+paper_draft/
+├── main.tex              # Main file that imports all sections
+├── references.bib        # BibTeX references
+├── sections/
+│   ├── abstract.tex      # Abstract content
+│   ├── introduction.tex  # Introduction section
+│   ├── preliminaries.tex # Definitions, notation, prerequisites
+│   ├── main_results.tex  # Theorems and proofs
+│   ├── discussion.tex    # Discussion and open questions
+│   └── conclusion.tex    # Conclusion section
+├── figures/              # Directory for any generated figures
+└── appendix/             # Directory for appendix sections (if needed)
+
+INSTRUCTIONS:
+1. First, create the directory structure above (mkdir -p paper_draft/sections paper_draft/figures paper_draft/appendix)
+2. Write main.tex using the AMS document class with proper theorem environments:
+
+   \documentclass{amsart}
+   \usepackage{amsmath,amssymb,amsthm}
+   \usepackage[hidelinks]{hyperref}
+   \usepackage{graphicx}
+   \usepackage{enumitem}
+
+   % Theorem environments
+   \newtheorem{theorem}{Theorem}[section]
+   \newtheorem{lemma}[theorem]{Lemma}
+   \newtheorem{proposition}[theorem]{Proposition}
+   \newtheorem{corollary}[theorem]{Corollary}
+   \newtheorem{conjecture}[theorem]{Conjecture}
+
+   \theoremstyle{definition}
+   \newtheorem{definition}[theorem]{Definition}
+   \newtheorem{example}[theorem]{Example}
+
+   \theoremstyle{remark}
+   \newtheorem{remark}[theorem]{Remark}
+
+   % Import command files (if they exist)
+   \InputIfFileExists{commands/math}{}{}
+   \InputIfFileExists{commands/general}{}{}
+   \InputIfFileExists{commands/macros}{}{}
+
+   % Bibliography style
+   \bibliographystyle{amsplain}
+
+   \author{NeuriCo}
+
+   - Use \input{sections/...} to include each section
+   - Use \bibliography{references} for references
+3. Write each section file with COMPLETE content (no placeholders)
+4. Each section file should include its \section{} command
+5. Write references.bib with all citations in BibTeX format
+6. After writing all files, compile the paper:
+   cd paper_draft && pdflatex -interaction=nonstopmode main.tex && bibtex main && pdflatex -interaction=nonstopmode main.tex && pdflatex -interaction=nonstopmode main.tex
+
+NOTE ON DOCUMENT CLASS:
+- Use \documentclass{amsart} (NOT \documentclass{article} with \usepackage{style})
+- The amsart class is part of the standard LaTeX distribution — no .sty file needed
+- It provides proper formatting for mathematical papers: theorem numbering,
+  proof environments, AMS math fonts, and standard math journal layout
+
+This modular structure allows humans to easily:
+- Edit individual sections without navigating a large file
+- Track changes per section
+- Reuse sections across different paper versions
+
+════════════════════════════════════════════════════════════════════════════════
+                          QUALITY REQUIREMENTS
+════════════════════════════════════════════════════════════════════════════════
+
+- Academic mathematical tone throughout
+- Every theorem must have a complete proof
+- All definitions must be precise and unambiguous
+- Proper citations using \cite{} commands
+- NO placeholder text - every section must have real content
+- The paper MUST compile without errors
+- If compilation fails, debug and fix the LaTeX errors
+
+════════════════════════════════════════════════════════════════════════════════
+                       MATHEMATICAL WRITING STYLE
+════════════════════════════════════════════════════════════════════════════════
+
+Follow these conventions for mathematical papers:
+
+1. LANGUAGE STYLE:
+   - Use "we" for collaborative exposition: "We prove", "We show", "We define"
+   - Be precise and direct: state results clearly before proving them
+   - Prefer plain language: "We now prove..." over "We shall henceforth demonstrate..."
+   - Use the present tense for mathematical facts: "Theorem 1 shows..."
+   - Avoid vague language: instead of "clearly" or "obviously", explain why
+
+2. INTRODUCTION STRUCTURE:
+   - Context and motivation (why this problem matters)
+   - History (what's known, with citations)
+   - Statement of results (informal but precise)
+   - Proof techniques (brief overview of methods)
+   - Paper organization (roadmap)
+
+3. THEOREM ENVIRONMENTS:
+   Use proper LaTeX theorem environments:
+   \begin{theorem}\label{thm:main}
+     Let $G$ be a graph with $n$ vertices. Then...
+   \end{theorem}
+
+   \begin{proof}
+     We proceed by induction on $n$. ...
+   \end{proof}
+
+4. DEFINITIONS:
+   \begin{definition}\label{def:widget}
+     A \emph{widget} is a pair $(X, \tau)$ where...
+   \end{definition}
+
+   - Italicize the term being defined using \emph{}
+   - State all conditions explicitly
+   - Give examples immediately after non-trivial definitions
+
+5. PROOF STRUCTURE:
+   - Begin with proof strategy: "The proof proceeds in two steps..."
+   - Number or label key claims within proofs
+   - Use \qedhere for proofs ending in displayed equations
+   - Signal transitions: "It remains to show...", "We now verify..."
+
+6. NOTATION CONVENTIONS:
+   - Define all notation in Preliminaries
+   - Use standard notation: $\mathbb{R}$, $\mathbb{Z}$, $\mathbb{N}$
+   - Use \coloneqq or := for definitions
+   - Be consistent: one symbol = one meaning throughout
+
+7. MATHEMATICAL FORMATTING:
+   - Displayed equations for important formulas: \[ ... \]
+   - Inline math for brief expressions: $...$
+   - Use align environment for multi-line equations
+   - Number only equations that are referenced later
+
+8. REFERENCES AND CITATIONS:
+   - Cite prior results when used: "By \cite{author2024}..."
+   - Distinguish between "Theorem 3 of \cite{...}" and your own results
+   - Include both classic references and recent work
+
+9. EXAMPLES AND COUNTEREXAMPLES:
+   - Illustrate each major result with a concrete example
+   - Show tightness: counterexamples demonstrating necessity of hypotheses
+   - Use \begin{example} ... \end{example} environment
+
+10. FIGURES (if applicable):
+    - Diagrams for geometric arguments
+    - Graphs or plots from computational verification
+    - Commutative diagrams for algebraic results
+    - Use TikZ or include pre-generated figures
+
+════════════════════════════════════════════════════════════════════════════════
+                          WORKFLOW: REVIEW AND REFLECT
+════════════════════════════════════════════════════════════════════════════════
+
+Before calling finish, you MUST complete these review steps:
+
+1. REVIEW RESOURCES (at the start):
+   - Read .claude/skills/paper-writer/SKILL.md for detailed guidance
+   - Study templates/paper_writing/lab_style_guide.md for style conventions
+   - Skim paper_draft/example_paper.tex for amsart LaTeX conventions only
+   - Browse paper_examples/ for language patterns (if available)
+
+2. SELF-REFLECTION (before finishing):
+   After writing all sections, review your work against these criteria:
+
+   MATHEMATICAL CONTENT CHECK:
+   - [ ] Every theorem has a complete, rigorous proof
+   - [ ] All definitions are precise with explicit quantifiers
+   - [ ] Examples illustrate major results
+   - [ ] Counterexamples show necessity of hypotheses where applicable
+   - [ ] Notation is consistent throughout
+
+   FORMATTING CHECK:
+   - [ ] Theorem environments (\begin{theorem}...\end{theorem}) used properly
+   - [ ] Proof environments (\begin{proof}...\end{proof}) used for all proofs
+   - [ ] Is hyperref package included for clickable references?
+   - [ ] Labels and cross-references work correctly
+   - [ ] Bibliography entries are complete
+
+   STRUCTURE CHECK:
+   - [ ] Introduction previews main results clearly
+   - [ ] Preliminaries section makes the paper self-contained
+   - [ ] Results are ordered logically (lemmas before theorems that use them)
+   - [ ] Does the paper compile without errors?
+
+3. FIX ISSUES:
+   - Address any issues found in the self-reflection
+   - Re-compile and verify the PDF looks correct
+
+Only after completing this review should you consider the paper finished.

@@ -1,0 +1,12 @@
+PDF: papers/2410.11279_fixed_point_iterations_DNN.pdf
+Total pages: 31
+Pages per chunk: 5
+
+Chunks:
+  2410.11279_fixed_point_iterations_DNN_chunk_001.pdf: pages 1-5
+  2410.11279_fixed_point_iterations_DNN_chunk_002.pdf: pages 6-10
+  2410.11279_fixed_point_iterations_DNN_chunk_003.pdf: pages 11-15
+  2410.11279_fixed_point_iterations_DNN_chunk_004.pdf: pages 16-20
+  2410.11279_fixed_point_iterations_DNN_chunk_005.pdf: pages 21-25
+  2410.11279_fixed_point_iterations_DNN_chunk_006.pdf: pages 26-30
+  2410.11279_fixed_point_iterations_DNN_chunk_007.pdf: page 31

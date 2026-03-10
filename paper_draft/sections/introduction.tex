@@ -1,0 +1,68 @@
+\section{Introduction}\label{sec:intro}
+
+Chain-of-thought (CoT) prompting has emerged as the dominant technique for
+eliciting complex reasoning from large language models (LLMs)
+\cite{wei2022chain}. By decomposing a problem into sequential reasoning steps,
+CoT enables LLMs to solve tasks that are intractable in a single forward pass.
+Despite the empirical success of this paradigm, a rigorous mathematical
+foundation for understanding \emph{when} and \emph{why} iterative reasoning
+converges to correct solutions remains undeveloped.
+
+Recent work has approached this question from several directions. Kim, Wu, Lee,
+and Suzuki \cite{kim2025metastable} model CoT as a Markov chain on a finite
+state space of logical assertions with metastable cluster structure,
+establishing power-law hitting time bounds of order $\widetilde{\Theta}(KM/\varepsilon)$
+for reaching target reasoning states. Carson \cite{carson2025stochastic}
+develops a stochastic differential equation framework in which the reasoning
+process is governed by a Fokker--Planck equation, identifying phase transitions
+between convergent and divergent regimes. Bai, Kolter, and Koltun
+\cite{bai2019deep} introduce deep equilibrium models, which formalize neural
+network inference as convergence to a fixed point, with convergence rate
+controlled by the spectral radius of the Jacobian. Ke et al.\
+\cite{ke2024fixed} extend this to looped neural networks, proving exponential
+convergence $\|x^{(L)} - p\| \le K^L \cdot c$ with contraction constant $K < 1$.
+
+These results suggest two qualitatively different convergence behaviors:
+exponential convergence under contraction conditions and slow convergence in the
+presence of metastable traps. However, several fundamental questions remain open.
+First, no prior work provides convergence analysis for CoT iterations in the
+Wasserstein metric on probability distributions, despite Wasserstein distances
+being the natural metric for distributional convergence of stochastic processes.
+Second, the spectral theory of the CoT transition operator---connecting
+eigenvalues to convergence rates---has not been developed in a unified manner.
+Third, the conditions separating exponential from slow convergence regimes have
+not been characterized in terms of problem parameters.
+
+In this paper, we address these gaps by developing a rigorous mathematical
+framework for CoT reasoning as a discrete dynamical system on probability
+distributions. Our main contributions are as follows.
+
+\begin{itemize}[leftmargin=*,itemsep=2pt,topsep=4pt]
+\item We formalize CoT reasoning as a Markov transition operator
+  $T \colon \mathcal{P}(S) \to \mathcal{P}(S)$ on the probability simplex
+  equipped with the Wasserstein metric, and prove well-posedness and continuity
+  (Lemma~\ref{lem:wellposed}).
+
+\item We establish exponential convergence in $W_1$ under Dobrushin contraction,
+  with rate governed by a Wasserstein contraction coefficient that is finer than
+  the classical Dobrushin coefficient (Theorem~\ref{thm:exponential}).
+
+\item We derive an exact first-order formula for the spectral gap of
+  $(K,\varepsilon)$-metastable transition matrices, $\gamma = K\varepsilon/(K-1)$,
+  via perturbation analysis of the aggregated inter-cluster chain
+  (Theorem~\ref{thm:metastable}).
+
+\item We characterize a phase transition at critical coupling
+  $\varepsilon_c = (K-1)\gamma_{\mathrm{intra}}/K$ separating slow-mixing and
+  fast-mixing regimes (Theorem~\ref{thm:phase}).
+
+\item We verify all theoretical predictions computationally, achieving
+  $r = 0.979$ correlation between predicted and empirical convergence rates.
+\end{itemize}
+
+The paper is organized as follows. Section~\ref{sec:prelim} introduces the
+state space, Wasserstein metrics, transition operators, and contraction
+coefficients. Section~\ref{sec:results} contains the main results with
+complete proofs. Section~\ref{sec:discussion} discusses implications for CoT
+prompting, connections to prior work, and open questions.
+Section~\ref{sec:conclusion} summarizes our contributions.

@@ -1,0 +1,20 @@
+We develop a mathematical framework for analyzing chain-of-thought (CoT) reasoning
+as a discrete dynamical system on the probability simplex equipped with the
+Wasserstein metric. We model CoT as a Markov transition operator $T$ acting on
+probability distributions over a finite state space of reasoning states, and
+establish convergence rate bounds in two regimes. In the contractive regime, we
+prove that when the Dobrushin coefficient $\delta(T)$ is strictly less than one,
+the iterates converge exponentially to the unique stationary distribution in the
+$W_1$ metric, with rate governed by a finer Wasserstein contraction coefficient.
+In the metastable regime, for transition matrices with $(K,\varepsilon)$-metastable
+cluster structure, we derive an exact formula for the spectral gap
+$\gamma = K\varepsilon/(K-1) + O(\varepsilon^2)$ using perturbation theory on
+the aggregated inter-cluster chain, yielding precise mixing time asymptotics.
+We characterize a phase transition in convergence behavior at a critical coupling
+$\varepsilon_c$ separating slow and fast mixing regimes. Our proofs combine
+Kantorovich--Rubinstein duality, the Banach fixed-point theorem, and matrix
+perturbation theory. All theoretical predictions are verified computationally:
+the correlation between predicted spectral convergence rates and empirical $W_2$
+decay rates is $r = 0.979$ across 30 random transition matrices, and the
+predicted spectral gaps for metastable chains match numerical eigenvalue
+computations to machine precision.

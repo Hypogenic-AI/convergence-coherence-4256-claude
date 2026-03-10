@@ -1,0 +1,119 @@
+\section{Discussion}\label{sec:discussion}
+
+\subsection{Exponential versus power-law convergence}
+
+A central finding of this work is that convergence of CoT iterations on finite
+state spaces is \emph{always exponential}, governed by the spectral gap of the
+transition operator. The appearance of power-law convergence, as suggested by the
+hitting time result $\widetilde{\Theta}(KM/\varepsilon)$ of Kim et al.\
+\cite{kim2025metastable}, arises from two mechanisms.
+
+First, in the metastable regime with small $\varepsilon$, the convergence rate
+$1 - K\varepsilon/(K-1) \approx 1$ is close to unity. On any practical time
+horizon, this slow exponential is indistinguishable from a power law. The Kim
+et al.\ hitting time characterizes first passage to a \emph{specific} target
+state rather than distributional convergence, and is consistent with our
+spectral gap result since the mixing time scales as
+$O((K-1)/(K\varepsilon) \cdot \log(1/\delta))$.
+
+Second, the separation between within-cluster and between-cluster timescales
+creates multi-scale dynamics: fast initial convergence (within-cluster
+equilibration) followed by slow convergence (between-cluster mixing). This
+two-phase behavior mimics power-law decay on intermediate timescales. Our
+computational experiments confirm that exponential fits achieve $R^2 > 0.99$
+across the entire range of $\varepsilon$, while power-law fits are consistently
+inferior.
+
+\subsection{The spectral gap as the fundamental quantity}
+
+Theorems~\ref{thm:spectral}--\ref{thm:metastable} establish the spectral gap
+$\gamma$ as the fundamental quantity governing convergence. The relationship
+between $\gamma$ and convergence rate takes two forms:
+\begin{itemize}[leftmargin=*]
+\item In total variation: rate $= 1 - \gamma$ (asymptotically exact).
+\item In $W_2$: rate $\approx (1 - \gamma)^{1/2}$
+  (verified empirically; see Remark~\ref{rem:W2_rate}).
+\end{itemize}
+The square-root relationship in $W_2$ is a consequence of the comparison
+inequality between $W_2$ and total variation on finite metric spaces
+(Remark~\ref{rem:TV_W}). It remains open whether this bound is tight; see
+Section~\ref{sec:open}.
+
+\subsection{Connections to prior work}
+
+The hitting time result of Kim et al.\ \cite{kim2025metastable},
+$\widetilde{\Theta}(KM/\varepsilon)$, is consistent with our spectral gap
+$\gamma = K\varepsilon/(K-1)$: the mixing time is $O(1/\gamma)$, and the
+factor of $M$ in their result reflects that hitting a specific state within a
+cluster of size $M$ incurs an additional $\Theta(M)$ factor beyond
+distributional mixing.
+
+The exponential convergence rate $K^L$ for looped networks established by
+Ke et al.\ \cite{ke2024fixed} corresponds to
+Theorem~\ref{thm:exponential}, where $K < 1$ plays the role of the Dobrushin
+or Wasserstein contraction coefficient.
+
+The JKO convergence results of Cheng et al.\ \cite{cheng2024convergence} for
+flow-based generative models in $W_2$ under $\lambda$-convexity provide a
+continuous-space parallel to our Theorem~\ref{thm:spectral}. Their exponential
+convergence in $W_2$ via proximal gradient descent in Wasserstein space
+corresponds to our discrete spectral convergence, with $\lambda$-convexity
+playing the role of the spectral gap.
+
+The eigenvalue classification of convergence regimes by Shukla and Joshi
+\cite{shukla2025sde}---exponential, oscillatory, and boundary
+attraction---parallels our spectral characterization adapted from continuous
+SDEs to discrete Markov operators.
+
+\subsection{Implications for CoT prompting}
+
+Our results yield several practical implications.
+
+\emph{Number of reasoning steps.} The required number of CoT steps scales as
+$O(1/\gamma \cdot \log(1/\delta))$ for accuracy $\delta$. For metastable
+problems with $K$ reasoning stages and inter-stage coupling $\varepsilon$,
+this is $O((K-1)/(K\varepsilon) \cdot \log(1/\delta))$.
+
+\emph{Diminishing returns.} Due to exponential convergence, the marginal
+benefit of each additional CoT step decreases geometrically. This suggests the
+existence of an optimal stopping time beyond which additional reasoning steps
+provide negligible improvement.
+
+\emph{Multiple solutions.} When the transition operator has multiple
+near-fixed-points (metastable clusters), the CoT process may converge to an
+incorrect fixed point depending on initialization. This provides a mathematical
+explanation for why prompt engineering matters: the initial prompt directs the
+reasoning trajectory toward the basin of attraction of the correct solution.
+
+\subsection{Open questions}\label{sec:open}
+
+We highlight several directions for future research.
+
+\begin{conjecture}[Tight $W_2$ contraction]\label{conj:W2}
+There exists a direct contraction bound
+$W_2(T\mu, T\nu) \le \kappa \cdot W_2(\mu, \nu)$ for $\kappa < 1$ under
+appropriate conditions on $P$, without passing through total variation. This
+would yield a convergence rate of $\kappa$ rather than $\sqrt{\kappa}$ in
+$W_2$.
+\end{conjecture}
+
+A direct $W_2$ contraction would sharpen Theorem~\ref{thm:spectral}(ii)
+considerably. The obstacle is that the Kantorovich--Rubinstein duality, which
+underlies our $W_1$ contraction proof, does not extend directly to $W_2$.
+
+\begin{conjecture}[Non-Markovian power laws]\label{conj:nonmarkov}
+For CoT processes with memory (non-Markovian dynamics), genuine power-law
+convergence $W_2(T^n \mu_0, \mu^*) = \Theta(n^{-\alpha})$ can emerge,
+with exponent $\alpha$ depending on the memory kernel.
+\end{conjecture}
+
+All Markov chains on finite state spaces converge exponentially. Genuine
+power-law convergence would require infinite state spaces or non-Markovian
+dynamics. Memory kernels or fractional dynamics \cite{carson2025stochastic}
+may provide the mechanism.
+
+Further open problems include: characterizing the continuous limit as
+$N \to \infty$ and its relation to SDE models
+\cite{carson2025statistical}; designing optimal transition kernels for a
+given target distribution; and quantifying the acceleration from
+non-reversible Markov chain strategies applied to CoT reasoning.

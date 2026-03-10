@@ -1,0 +1,33 @@
+\section{Conclusion}\label{sec:conclusion}
+
+We have established a rigorous mathematical framework for analyzing
+chain-of-thought reasoning as a discrete dynamical system on the probability
+simplex. Our main contributions are:
+
+\begin{enumerate}[label=(\arabic*)]
+\item Exponential convergence in $W_1$ under Dobrushin contraction
+  (Theorem~\ref{thm:exponential}), with rate governed by the Wasserstein
+  contraction coefficient $\eta(P) \le \delta(P)$.
+
+\item A spectral characterization of convergence rates
+  (Theorem~\ref{thm:spectral}): the $W_2$ rate is $(1 - \gamma)^{1/2}$,
+  verified empirically with $r = 0.979$ correlation across 30 random
+  transition matrices.
+
+\item An exact spectral gap formula $\gamma = K\varepsilon/(K-1)$ for
+  metastable chains (Theorem~\ref{thm:metastable}), matching numerical
+  computation to machine precision.
+
+\item A phase transition in convergence behavior at critical coupling
+  $\varepsilon_c = (K-1)\gamma_{\mathrm{intra}}/K$
+  (Theorem~\ref{thm:phase}), separating slow-mixing and fast-mixing
+  regimes.
+\end{enumerate}
+
+The framework provides a principled basis for understanding when and why
+iterative reasoning converges, with explicit dependence on problem structure
+(number of clusters $K$, coupling strength $\varepsilon$) and spectral
+properties of the transition operator. We expect the tools developed
+here---particularly the connection between metastable structure and spectral
+gap---to be applicable more broadly to the analysis of iterative inference
+procedures in machine learning.

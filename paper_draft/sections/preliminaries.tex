@@ -1,0 +1,155 @@
+\section{Preliminaries}\label{sec:prelim}
+
+We collect the definitions and background results needed throughout the paper.
+All state spaces are finite unless otherwise stated.
+
+\subsection{State space and probability simplex}
+
+\begin{definition}[Reasoning state space]\label{def:state}
+Let $S = \{s_1, \ldots, s_N\}$ be a finite set of \emph{reasoning states},
+equipped with a metric $d \colon S \times S \to \mathbb{R}_{\ge 0}$.
+In applications to chain-of-thought reasoning, $d$ is inherited from the
+Euclidean distance on hidden state embeddings:
+$d(s_i, s_j) = \|e_i - e_j\|_2$, where $e_i \in \mathbb{R}^D$ is the
+embedding of state $s_i$.
+\end{definition}
+
+\begin{definition}[Probability simplex]\label{def:simplex}
+The \emph{probability simplex} over $S$ is
+\[
+  \mathcal{P}(S) = \bigl\{ \mu \in \mathbb{R}^N : \mu_i \ge 0 \text{ for all }
+  i, \; \textstyle\sum_{i=1}^N \mu_i = 1 \bigr\}.
+\]
+\end{definition}
+
+\subsection{Wasserstein distances}
+
+\begin{definition}[Wasserstein-$p$ distance]\label{def:wasserstein}
+For $\mu, \nu \in \mathcal{P}(S)$ and $p \ge 1$, the
+\emph{Wasserstein-$p$ distance} is
+\begin{equation}\label{eq:wasserstein}
+  W_p(\mu, \nu) = \biggl( \min_{\pi \in \Pi(\mu, \nu)}
+  \sum_{i,j} \pi_{ij} \, d(s_i, s_j)^p \biggr)^{1/p},
+\end{equation}
+where $\Pi(\mu, \nu)$ is the set of all couplings: joint distributions on
+$S \times S$ with marginals $\mu$ and $\nu$.
+\end{definition}
+
+Since $S$ is finite, $(\mathcal{P}(S), W_p)$ is a compact metric space for
+every $p \ge 1$. The Wasserstein-1 distance admits a dual characterization
+that we use extensively.
+
+\begin{theorem}[Kantorovich--Rubinstein duality {\cite{villani2009optimal}}]
+\label{thm:KR}
+For $\mu, \nu \in \mathcal{P}(S)$,
+\begin{equation}\label{eq:KR}
+  W_1(\mu, \nu) = \max \biggl\{ \sum_{i=1}^N f(s_i)(\mu_i - \nu_i) :
+  f \colon S \to \mathbb{R}, \; \Lip(f) \le 1 \biggr\},
+\end{equation}
+where $\Lip(f) = \max_{i \ne j} |f(s_i) - f(s_j)| / d(s_i, s_j)$.
+\end{theorem}
+
+\begin{remark}\label{rem:TV_W}
+On a finite metric space $(S, d)$, the total variation distance and
+Wasserstein distances are related by
+\begin{equation}\label{eq:TV_W}
+  W_p(\mu, \nu) \le \diam(S) \cdot \|\mu - \nu\|_{\TV}^{1/p},
+\end{equation}
+where $\|\mu - \nu\|_{\TV} = \tfrac{1}{2} \sum_i |\mu_i - \nu_i|$ and
+$\diam(S) = \max_{i,j} d(s_i, s_j)$.
+\end{remark}
+
+\subsection{Transition operators}
+
+\begin{definition}[Transition kernel]\label{def:kernel}
+A \emph{transition kernel} on $S$ is a row-stochastic matrix
+$P \in \mathbb{R}^{N \times N}$, where $P_{ij} \ge 0$ and
+$\sum_j P_{ij} = 1$ for all $i$. The entry $P_{ij}$ represents the
+probability of transitioning from state $s_i$ to state $s_j$ in one step.
+\end{definition}
+
+\begin{definition}[CoT transition operator]\label{def:operator}
+Given a transition kernel $P$, the \emph{CoT transition operator}
+$T \colon \mathcal{P}(S) \to \mathcal{P}(S)$ is defined by
+$T\mu = \mu P$, where $\mu$ is viewed as a row vector. Concretely,
+$(T\mu)_j = \sum_i \mu_i P_{ij}$.
+\end{definition}
+
+A distribution $\mu^* \in \mathcal{P}(S)$ is \emph{stationary} for $T$ if
+$T\mu^* = \mu^*$, equivalently $\mu^* P = \mu^*$. We say $P$ is
+\emph{irreducible} if for every pair $(i, j)$ there exists $n \ge 1$ with
+$P^n_{ij} > 0$, and \emph{aperiodic} if $\gcd\{n \ge 1 : P^n_{ii} > 0\} = 1$
+for all $i$. An irreducible aperiodic chain on a finite state space has a
+unique stationary distribution with $\mu^*_i > 0$ for all $i$
+\cite{levin2009markov}.
+
+\subsection{Contraction coefficients}
+
+\begin{definition}[Dobrushin coefficient]\label{def:dobrushin}
+For a transition matrix $P$, the \emph{Dobrushin coefficient} is
+\begin{equation}\label{eq:dobrushin}
+  \delta(P) = \frac{1}{2} \max_{i,k} \sum_j |P_{ij} - P_{kj}|
+  = 1 - \min_{i,k} \sum_j \min(P_{ij}, P_{kj}).
+\end{equation}
+\end{definition}
+
+The Dobrushin coefficient satisfies $0 \le \delta(P) \le 1$, with $\delta(P) = 0$
+if and only if all rows of $P$ are identical, and $\delta(P) < 1$ if and only if
+every pair of rows shares a common entry bounded away from zero
+\cite{dobrushin1956central}.
+
+\begin{definition}[Wasserstein contraction coefficient]\label{def:eta}
+For a transition matrix $P$ on $(S, d)$, the
+\emph{Wasserstein contraction coefficient} is
+\begin{equation}\label{eq:eta}
+  \eta(P) = \sup_{i \ne k} \frac{W_1(P_i, P_k)}{d(s_i, s_k)},
+\end{equation}
+where $P_i = (P_{i1}, \ldots, P_{iN})$ denotes the $i$-th row of $P$ viewed
+as a probability measure on $S$.
+\end{definition}
+
+\begin{remark}\label{rem:eta_delta}
+The Wasserstein contraction coefficient $\eta(P)$ satisfies $\eta(P) \le \delta(P)$,
+so $\delta(P) < 1$ implies $\eta(P) < 1$. However, $\eta(P) < 1$ can hold even
+when $\delta(P) = 1$, depending on the metric structure of $S$. The coefficient
+$\eta(P)$ is therefore a finer measure of contractivity.
+\end{remark}
+
+\subsection{Spectral gap}
+
+\begin{definition}[Spectral gap]\label{def:gap}
+Let $P$ be an irreducible aperiodic transition matrix with eigenvalues
+$1 = \lambda_1 \ge |\lambda_2| \ge \cdots \ge |\lambda_N|$. The
+\emph{spectral gap} of $P$ is
+\begin{equation}\label{eq:gap}
+  \gamma(P) = 1 - |\lambda_2|.
+\end{equation}
+\end{definition}
+
+The spectral gap controls the asymptotic rate of convergence to stationarity.
+The \emph{mixing time} to within total variation distance $\delta$ satisfies
+\begin{equation}\label{eq:mixing}
+  t_{\mix}(\delta) \le \frac{1}{\gamma} \log \frac{1}{\delta \cdot \min_i \mu^*_i},
+\end{equation}
+a standard result in Markov chain theory \cite{levin2009markov}.
+
+\subsection{Metastable structure}
+
+\begin{definition}[$(K, \varepsilon)$-metastable structure]\label{def:meta}
+A transition matrix $P$ on $S$ has \emph{$(K, \varepsilon)$-metastable structure}
+if $S = C_1 \cup \cdots \cup C_K$ is a partition with $|C_k| = M$ for all $k$,
+and the transition probabilities satisfy:
+\begin{enumerate}[label=(\roman*)]
+\item $P_{ij} = \Theta(1/M)$ for $s_i, s_j \in C_k$ (within-cluster), and
+\item $P_{ij} = \Theta(\varepsilon / (KM))$ for $s_i \in C_k$, $s_j \in C_l$,
+  $k \ne l$ (between-cluster).
+\end{enumerate}
+The parameter $\varepsilon \in (0, 1)$ controls the strength of inter-cluster
+coupling.
+\end{definition}
+
+In the context of CoT reasoning, each cluster $C_k$ represents a
+\emph{reasoning stage}: a group of related intermediate states among which the
+reasoning process mixes rapidly, while transitions between stages are rare.
+The difficulty parameter $\varepsilon$ captures the accessibility of
+inter-stage transitions.

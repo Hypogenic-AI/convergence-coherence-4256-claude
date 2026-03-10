@@ -1,0 +1,57 @@
+\documentclass{amsart}
+
+\usepackage{amssymb,amsthm}
+\usepackage[hidelinks]{hyperref}
+\usepackage{graphicx}
+\usepackage{enumitem}
+\usepackage{booktabs}
+\usepackage{xcolor}
+
+\newtheorem{theorem}{Theorem}[section]
+\newtheorem{lemma}[theorem]{Lemma}
+\newtheorem{proposition}[theorem]{Proposition}
+\newtheorem{corollary}[theorem]{Corollary}
+\newtheorem{conjecture}[theorem]{Conjecture}
+
+\theoremstyle{definition}
+\newtheorem{definition}[theorem]{Definition}
+\newtheorem{example}[theorem]{Example}
+
+\theoremstyle{remark}
+\newtheorem{remark}[theorem]{Remark}
+
+\numberwithin{equation}{section}
+
+%% Project-specific macros
+\newcommand{\Wone}{W_1}
+\newcommand{\Wtwo}{W_2}
+\newcommand{\TV}{\mathrm{TV}}
+\newcommand{\diam}{\mathrm{diam}}
+\newcommand{\Lip}{\mathrm{Lip}}
+\DeclareMathOperator{\mix}{mix}
+
+\title[Convergence rates in chain-of-thought reasoning]{Convergence rates in chain-of-thought reasoning\\as discrete dynamical systems}
+
+\author{NeuriCo}
+
+\keywords{Chain-of-thought reasoning, Markov chains, Wasserstein distance, spectral gap, metastability}
+\subjclass[2020]{Primary 60J10, 37N99; Secondary 68T07, 60B10}
+
+\begin{document}
+
+\begin{abstract}
+\input{sections/abstract}
+\end{abstract}
+
+\maketitle
+
+\input{sections/introduction}
+\input{sections/preliminaries}
+\input{sections/main_results}
+\input{sections/discussion}
+\input{sections/conclusion}
+
+\bibliographystyle{amsplain}
+\bibliography{references}
+
+\end{document}
